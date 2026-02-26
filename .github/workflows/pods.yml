@@ -34,6 +34,9 @@ jobs:
         run: aws eks update-kubeconfig --name my-eks-cluster --region ${{ matrix.region }}
       - name: deploy application
         run: |
+          kubectl delete svc app-service
+
+
           kubectl apply -f app.yml
           kubectl apply -f service.yml    
       
