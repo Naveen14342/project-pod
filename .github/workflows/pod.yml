@@ -1,0 +1,40 @@
+name: application-deployment
+on:
+  push:
+    branches:
+      - feature/app-deployment
+permissions:
+  id-token: write 
+  contents: read
+jobs:
+  deploy:
+    runs-on: self-hosted
+    strategy:
+      max-parallel: 1
+      matrix:
+        include:
+          - environment: dev
+            region: us-east-1
+          - environment: test
+            region: us-east-2
+    env:
+      TF_VAR_environment: ${{ matrix.environment }}
+    defaults:
+      run:
+        working-directory: ${{ matrix.environment }}  
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3 
+      - name: aws-credentials
+        uses: aws-actions/configure-aws-credentials@v2  
+        with:
+          role-to-assume: arn:aws:iam::083546510488:role/github-pipeline-pod
+          aws-region: ${{ matrix.region }}
+      - name: configure kubeconfig
+        run: aws eks update-kubeconfig --name my-eks-cluster --region ${{ matrix.region }}
+      - name: deploy application
+        run: |
+          kubectl apply -f app.yml
+          kubectl apply -f service.yml    
+      
+  
