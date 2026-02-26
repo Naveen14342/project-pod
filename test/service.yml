@@ -1,6 +1,6 @@
-apiVersion: apps/v1
+apiVersion: v1
 kind: Service
-metada:
+metadata:
   name: app-service
 spec:
   selector:
